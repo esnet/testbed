@@ -19,77 +19,103 @@
  Part 1:    This functions implements the GUI creation, organization and layout.
  ****************************************************************************************************************
 */
-// this function is REQUIRED for google apps script. Equivalent to Javas public static void main function.
-function doGet(e){ 
-  
+  // global variables.
   var scriptOwner = "tcsiwula@lbl.gov"; // who to notify if something goes wrong.  
   var testbedSpreadsheetId = "0AtJqjBgyyGhXdGhONUZOOGxic0FSYkZSaGotQnZ1cGc"; // the ID of the 100G testbed users spreadsheet.
   var nameOfFirstSheet = "Master";
   var nameOfSecondSheet = "Projects";
   var user = Session.getActiveUser().getEmail(); //grabs the current google user.
-  var selected; //need to assign this to the image the user selects via handlers and pass into line 47 as an argument.
+// this function is REQUIRED for google apps script. Equivalent to Javas public static void main function.
+function doGet(e){ 
    
  // Create app object.
   var app = UiApp.createApplication().setTitle('TRS Baby!'); 
   
   //Widgets to add to the app.
   var submitButton = app.createButton('Submit');  // calls back handler when clicked
-  var helloUserLabel = app.createLabel( 'Hey ' + user + " ! Select one of your projects.");
-
-  // A listbox for the projects.
+  var helloUserLabel = app.createLabel( 'Hey ' + user + " ! Select one of your projects below: ");
+  
+  var grid = app.createGrid(6,2).setCellPadding(10);
+  app.add(grid);
+   
+  grid.setText(0, 0, 'User:');
+  grid.setText(0, 1, user);
+  grid.setText(1, 0, 'Lease time:');
+  grid.setText(2, 0, 'Project:');
+  grid.setText(3, 0, 'Images:');
+  grid.setText(4, 0, 'Request:');
+ 
+  // This logic fetches the users projects and stores them in an array.
   var arrayOfProjects = new Array( );
   arrayOfProjects = getUsersData( testbedSpreadsheetId, nameOfFirstSheet, user, "Google ID", "Project Name" );
   arrayOfProjects =  arrayOfProjects.split(',');
-
-  // A listbox for the images.
-  var arrayOfImages = new Array();
- arrayOfImages = getUsersData( testbedSpreadsheetId, nameOfSecondSheet, "Project-X", "Project Name", "Images" );
+  
+  // This logic grabs each project from the array (above) and adds it to the list.
+  var list1 = app.createListBox(true).setName('list1').setId('list1').setWidth(200); 
+  grid.setWidget(2, 1, list1).setId('grid');
+  list1.addItem('Select');
+  for (i =0; i < arrayOfProjects.length; i++) {
+    list1.addItem( arrayOfProjects[i] );
+  } 
+  
+  var handler = app.createServerChangeHandler('changeList2');
+  handler.addCallbackElement(grid);  
+  list1.addChangeHandler(handler); 
+  
+  return app;
+}
+  /*
+ ****************************************************************************************************************
+ Part 1.3:    Handler function.
+ ****************************************************************************************************************
+*/
+//Event logic for when user selects a project.
+function changeList2(e){
+  var app = UiApp.getActiveApplication();
+  var list1Value = e.parameter.list1 //this is the name from list1 
+  Logger.log("list1Value = " + list1Value);
+  
+  
+  // for references purposes only
+  var arrayOfProjects = new Array( );
+  arrayOfProjects = getUsersData( testbedSpreadsheetId, nameOfFirstSheet, user, "Google ID", "Project Name" );
+  arrayOfProjects =  arrayOfProjects.split(',');
+  
+  
+ // This logic fetches the users images and stores them in an array.
+ var arrayOfImages = new Array();
+ arrayOfImages = getUsersData( testbedSpreadsheetId, nameOfSecondSheet, list1Value, "Project Name", "Images" );
  arrayOfImages = arrayOfImages.split(',');
   
-  //handler for when a user selects a project.
-  var projectsHandler = app.createServerHandler('userSelectedAProject');
-  //arrayOfProjects.addClickHandler(userSelectedAProject);
- // listOfProjects.addClickHandler(userSelectedAProject);
-  
-  // This loops throught the length of the arrayOfProjects, creates a new project item and adds it to the listOfProjects. 
-  var listOfProjects = app.createListBox(false).setName('listOfProjects').setId('userSelectedProject').addChangeHandler(projectsHandler).setWidth('300px'); 
-  for (i =0; i < arrayOfProjects.length; i++) {
-    listOfProjects.addItem( arrayOfProjects[i] );
-  } 
-  
-  // This loops throught the length of the arrayOfImages, creates a new image item and adds it to the listOfImages. 
- var listOfImages = app.createListBox(false).setName('listOfImages').setId('userSelectedImage').setWidth('300px'); 
+  // This logic grabs each image from the array (above) and adds it to the list.
+ var list2 = app.createListBox(true).setName('list2').setId('list2').setWidth(200); 
+  app.getElementById('grid').setWidget(3, 1, list2);
+  list2.addItem('Select');
   for (i =0; i < arrayOfImages.length; i++) {
-    listOfImages.addItem( arrayOfImages[i] );
-  } 
+    list2.addItem( arrayOfImages[i] );
+  }   
+   
+  var handler2 = app.createServerChangeHandler('results');
+  handler2.addCallbackElement(app.getElementById('grid'));  
+  list2.addChangeHandler(handler2);  
   
- 
-   // adds the grid to the app
-  app.add(app.createGrid(5, 1)
-       .setWidget(0, 0, helloUserLabel)
-       .setWidget(1, 0, listOfProjects)
-       .setWidget(2, 0, listOfImages)
-       .setWidget(3, 0, null)
-       .setWidget(4, 0, submitButton)
-       .setBorderWidth(1)
-       .setCellSpacing(10)
-       .setCellPadding(10));
-  
-  // adds the calendar to the app
+   for (i in arrayOfProjects)
+   {
+     if ( arrayOfProjects[i] = list1Value)
+     {
+       for (i in arrayOfImages) 
+       {
+         list2.addItem( arrayOfImages[i] );
+       }
+     } 
+   }
   return app;
 }
 
-  /*
- ****************************************************************************************************************
- Part 1.3:    Handler Logic :(
- ****************************************************************************************************************
-*/
-function userSelectedAProject(e){
+function results(e){
   var app = UiApp.getActiveApplication();
   
-  var listOfImages = app.getElementById('userSelectedProject');//grabs the object listOfProjects to locate the event selection.
-  listOfImages.setVisible(true);
-  app.close();
+  app.getElementById('grid').setText(4, 1, e.parameter.list1 + ', ' + e.parameter.list2);
   return app;
 }
 /*
@@ -102,11 +128,11 @@ function getUsersData(spreadsheetId, sheetName, key, keyColumn, valueColumn)
 {  
   var spreadSheet = SpreadsheetApp.openById(spreadsheetId);
   var currentSheet = spreadSheet.getSheetByName(sheetName); // this grabs sheet with the users project information.
-   //Logger.log("currentSheet = " + currentSheet);
+   Logger.log("currentSheet = " + currentSheet);
    Logger.log("sheetName = " + sheetName);
   
   if (currentSheet == null) {
-    //Logger.log("Cant open sheetName = " + sheetName);
+    Logger.log("Cant open sheetName = " + sheetName);
   }
   var userColumnLocation, userRowLocation, userXY, projectColumnLocation, projectRowLocation, usersGoogleID, usersProjects;
   var data = currentSheet.getDataRange().getValues();
@@ -117,14 +143,15 @@ function getUsersData(spreadsheetId, sheetName, key, keyColumn, valueColumn)
   {
     if ( data[0][i] == keyColumn ) {
       userColumnLocation = i;
-      //Logger.log("userColumnLocation = " + userColumnLocation);
+      Logger.log("userColumnLocation = " + userColumnLocation);
     }
   }
   // Step 2
   // Locate the userRowLocation in userColumnLocation
   for (var i = 0; i < currentSheet.getLastRow(); i++) 
   {
-          Logger.log("key = " + key);
+          Logger.log("key = " + key + "@ " + i);
+          Logger.log("currentSheet.getLastRow() = " + currentSheet.getLastRow());
 
     if (data[i][userColumnLocation] == key ) {
       
