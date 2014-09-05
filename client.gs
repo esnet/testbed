@@ -78,7 +78,7 @@ function doGet(e){
     }
     
     
-    var handler = app.createServerChangeHandler('changeList2');
+    var handler = app.createServerHandler('changeList2');
     handler.addCallbackElement(grid);
     list1.addChangeHandler(handler);
     
@@ -157,7 +157,7 @@ function results(e){
  are on the list and then returns their corresponding array of projects.
  ****************************************************************************************************************
  */
-function getUsersData(spreadsheetId, sheetName, key, keyColumn, valueColumn)
+function getUsersData(spreadsheetId, sheetName, firstRowKey, firstHeaderKey, secondHeaderKey)
 {
     var spreadSheet = SpreadsheetApp.openById(spreadsheetId);
     var currentSheet = spreadSheet.getSheetByName(sheetName); // this grabs sheet with the users project information.
@@ -167,185 +167,64 @@ function getUsersData(spreadsheetId, sheetName, key, keyColumn, valueColumn)
     if (currentSheet == null) {
         //Logger.log("Cant open sheetName = " + sheetName);
     }
-    var userColumnLocation, userRowLocation, userXY, projectRowLocation, usersGoogleID;
+    var firstHeaderKeyIndex, secondHeaderKeyIndex, firstRowKeyIndex, secondRowKeyIndex, userRowIndex, userXY, projectRowLocation, usersGoogleID;
     var data = currentSheet.getDataRange().getValues();
     var usersProjects = new Array();
     var projectColumnLocation;
     
     
-    // Logger.log("testbedSpreadsheetId = " + testbedSpreadsheetId);
-    // Logger.log("nameOfSecondSheet = " + nameOfSecondSheet);
-    // Logger.log("key = " + key);
-    Logger.log("keyColumn = " + keyColumn);
-    //Logger.log("valueColumn = " + valueColumn);
+    Logger.log("secondHeaderKeyIndex = " + secondHeaderKeyIndex);
+    Logger.log("firstRowKey = " + firstRowKey);
+    Logger.log("secondHeaderKey = " + secondHeaderKey);
     
-    //set header in an array to itterate over
-    var header = new Array();
-    for (var i = 0; i < data[0].length; i++)
+    
+    // Step 1: Locate firstHeaderKeyIndex
+    for (var i = 0; i < data[0][i].length; i++)
     {
-        header.push( data[0][i] );
-    }
-    
-    for (i in header)
-    {
-        if ( header[i] = key)
-        {
-            Logger.log("######key = " + header[i]);
-            
-            // if ( )
-            
-        }
-    }
-    
-    
-    
-    //        for (i in arrayOfProjects)
-    //   {
-    //     if ( arrayOfProjects[i] = list1Value)
-    //     {
-    //       for (i in arrayOfImages)
-    //       {
-    //         list2.addItem( arrayOfImages[i] );
-    //       }
-    
-    // Step 1
-    // Locate userColumnLocation
-    for (var i = 0; i < data[0].length; i++)
-    {
-        if ( data[0][i] = keyColumn ) {
-            userColumnLocation = i;
-            Logger.log("Step1: userColumnLocation = " + userColumnLocation);
-            Logger.log("key = " + keyColumn);
-            Logger.log("matching against = " + data[i][i]);
-            break;
-        }
-    }
-    
-    // Step 2
-    // Locate the userRowLocation in userColumnLocation
-    for (var i = 0; i < currentSheet.getLastRow(); i++)
-    {
-        //Logger.log("Start looking for userRowLocation in userColumnLocation");
-        Logger.log("iteration i = " + i);
-        Logger.log("key = " + key);
-        Logger.log("lock = " + data[i][userColumnLocation]);
-        Logger.log("data[i][userColumnLocation] = key = " + (data[i][userColumnLocation] = key));
-        Logger.log("data[i][userColumnLocation] == key = " + (data[i][userColumnLocation] == key));
-        // data[row number][column number]
+        Logger.log("data[0][i] = firstHeaderKey::::: " + data[0][i] + " = " + firstHeaderKey);
         
-        if (data[i][userColumnLocation] = key ) {
-            //Logger.log("Entered if loop and confirming data[i][userColumnLocation] = key");
-            //Logger.log("iteration i = " + i);
-            //Logger.log("key = " + key);
-            //Logger.log("data[i][userColumnLocation] = " + data[i][userColumnLocation]);
-            userRowLocation = i;
-            //usersGoogleID = data[userRowLocation][userColumnLocation];
-            Logger.log("Step2: userRowLocation = " + userRowLocation);
-            Logger.log("key = " + key);
-            Logger.log("matching against = " + data[i][userColumnLocation]);
+        if ( data[0][i] == firstHeaderKey ) {
+            Logger.log("i = " + i);
+            firstHeaderKeyIndex = i;
+            Logger.log("Step1: Locate firstHeaderKeyIndex = " + firstHeaderKeyIndex + " is ***complete***.");
             break;
         }
     }
     
-    // Step 3
-    // Locate projectColumnLocation. This scans the top row looking for the name "Projects Name" and graps its y index location.
-    for (var i = 0; i < data[0].length + 1; i++)
+    // Step 2: Locate secondHeaderKeyIndex
+    for (var i = 0; i < data[0][i].length; i++)
     {
-        if ( data[0][i] = valueColumn ) {
-            projectColumnLocation = i;
-            Logger.log("Step3: projectColumnLocation = " + projectColumnLocation);
+        Logger.log("data[0][i] = secondHeaderKeyIndex::::: " + data[0][i] + " = " + secondHeaderKey);
+        
+        if ( data[0][i] == secondHeaderKey ) {
+            Logger.log("i = " + i);
+            secondHeaderKeyIndex = i;
+            Logger.log("Step2: Locate secondHeaderKeyIndex = " + secondHeaderKeyIndex + " is ***complete***.");
             break;
         }
     }
     
-    usersProjects = ( data[userRowLocation][projectColumnLocation ]);
-    Logger.log("Step4: usersProjects = " + usersProjects);
-    Logger.log("key = " + valueColumn);
-    Logger.log("matching against = " + data[0][i]);
+    // Step 3: Locate firstRowKeyIndex
+    for (var i = 0; i < data[i][firstHeaderKeyIndex].length; i++)
+    {
+        Logger.log("data[i][firstHeaderKeyIndex]::::: " + data[i][firstHeaderKeyIndex] + " = " + firstRowKey);
+        
+        if ( data[i][firstHeaderKeyIndex] == firstRowKey ) {
+            Logger.log("i = " + i);
+            firstRowKeyIndex = i;
+            Logger.log("Step3: Locate firstRowKeyIndex = " + firstRowKeyIndex + " is ***complete***.");
+            break;
+        }
+    }
     
-    return usersProjects;
-    Logger.log("##########################");
+    // Step 4: Assign secondRowKeyIndex
+    secondRowKeyIndex = data[firstRowKeyIndex][secondHeaderKeyIndex];
+    Logger.log("Step4: Assign secondRowKeyIndex = " + secondRowKeyIndex + " is ***complete***.");
+    
+    return secondRowKeyIndex;
+    
 }
 
-// Step 3
-// Locate projectColumnLocation. This scans the top row looking for the name "Projects Name" and graps its y index location.
-//  for (var i = 0; i < data[0].length; i++)
-//  {
-//       Logger.log("##########################");
-//       Logger.log("Start looking for projectColumnLocation in userColumnLocation");
-//       Logger.log("iteration i = " + i);
-//       Logger.log("valueColumn = " + valueColumn);
-//       Logger.log("userRowLocation = " + userRowLocation);
-//       Logger.log("data[userRowLocation][i] = " + data[userRowLocation][i]);
-//
-//       Logger.log("data[0] = " + data[0]);
-//       Logger.log("data[1] = " + data[1]);
-//       Logger.log("data[2] = " + data[2]);
-//  }
-//
-//
-//    Logger.log("Starting for loop.");
-//    for (i in data[0].length)
-//   {
-//     Logger.log("iteration i = " + i);
-//     Logger.log("list1Value = " + list1Value);
-//     Logger.log("data[i] = " + data[i]);
-//     var memory = new array[];
-//     if ( data[i] = list1Value)
-//     {
-//       projectColumnLocation = i;
-//       Logger.log("Step3: projectColumnLocation = " + projectColumnLocation);
-//     }
-//   }
-//
-//       Logger.log("##########################");
-//
-//    if ( data[i][0] == valueColumn ) {
-//      Logger.log("Entered if loop and confirming data[userRowLocation][i] = valueColumn");
-//      Logger.log("iteration i = " + i);
-//      Logger.log("valueColumn = " + valueColumn);
-//      Logger.log("data[userRowLocation][i] = " + data[userRowLocation][i]);
-//      projectColumnLocation = i;
-//      Logger.log("##########################");
-//      Logger.log("Step3: projectColumnLocation = " + projectColumnLocation);
-//      break;
-//    }
-// Step 4
-// Locate the projectRowLocation in projectColumnLocation
-//  for (var i = 0; i < currentSheet.getLastRow(); i++)
-//  {
-//
-//    if ( data[i][projectColumnLocation] = data[userRowLocation][projectColumnLocation] )
-//    {
-//      projectRowLocation = i;
-//      Logger.log("projectRowLocation = " + projectRowLocation);
-//      usersProjects = (data[userRowLocation][projectColumnLocation]);
-//      Logger.log("Step4: usersProjects = " + usersProjects);
-//      break;
-//    }
-//
-//  }
-// Finally return current users projects.
-//Logger.log("projectColumnLocation = " + projectColumnLocation);
-//Logger.log("userRowLocation = " + userRowLocation);
-// data[row number][column number]
-//data[0][0] = Type
-//data[0][1] = Name
-// data[0][2] = Primary emai
-//Logger.log("data[0][0] = " + data[0][0]);
-//Logger.log("data[0][1] = " + data[0][1]);
-//Logger.log("data[0][2] = " + data[0][2]);
-//Logger.log("data[userRowLocation][0] = " + data[userRowLocation][0]);
-//  Logger.log("data[projectColumnLocation][0] = " + data[projectColumnLocation][0]);
-//  Logger.log("data[0][projectColumnLocation] = " + data[0][projectColumnLocation]);
-//  Logger.log("data[projectColumnLocation][0] = " + data[projectColumnLocation][0]);
-//  Logger.log("data[0][projectColumnLocation] = " + data[0][projectColumnLocation]);
-//
-//    // data[row number][column number]
-//Logger.log("##########################");
-//Logger.log("userRowLocation = " + userRowLocation);
-//Logger.log("projectColumnLocation = " + projectColumnLocation);
-//Logger.log("data[userRowLocation][projectColumnLocation] = " + data[userRowLocation][projectColumnLocation]);
 /*
  ****************************************************************************************************************
  Part y:    This function grabs the current events from the calendar ... tbc
