@@ -28,21 +28,66 @@ var list_time, list_day, list_project, list_image;
 var arrayOfProjects = new Array();
 var selected_time, selected_day, selected_project, selected_image;
 
-// this function is REQUIRED for google apps script. Equivalent to Javas public static void main function.
+// this function "doGet" is REQUIRED for google apps script.
+// Equivalent to Java's or C's main function.
 function doGet(e){
     
     // Create app object.
     var app = UiApp.createApplication().setTitle('TRS Baby!');
-    var grid = app.createGrid(6,2).setCellPadding(10);
+    var grid = app.createGrid(7,2).setCellPadding(10);
     app.add(grid);
-    // app.add(app.createImage("http://i62.tinypic.com/eq9i1l.jpg")); //adds a image to the background
+    
+    //background image
+    app.add(app.createImage('http://i62.tinypic.com/eq9i1l.jpg'));
+    
+    
+    //background color
     app.setStyleAttribute("background", "grey");
+    
+    //grid to hold drop down objects
     grid.setText(0, 0, 'Account:');
     grid.setText(0, 1, user);
     grid.setText(1, 0, 'Reservation Length:');
     grid.setText(2, 0, 'Project:');
     grid.setText(3, 0, 'Images:');
     grid.setText(4, 0, 'Request:');
+    grid.setText(5, 0, 'Events:');
+    
+    
+    // reservation time drop down box
+    var list_time = app.createListBox().setName('list_time').setId('list_time').setWidth(200).setEnabled(true);
+    grid.setWidget(1, 1, list_time).setId('grid');
+    list_time.addItem('Select');
+    list_time.addItem('2 Hours');
+    list_time.addItem('4 Hours');
+    list_time.addItem('6 Hours');
+    list_time.setVisibleItemCount(1);
+    
+    
+    // create a calendar object so you can call its methods.
+    var calendar = CalendarApp.getCalendarById('en33gc2eubmq6clivk1s0imc28k@group.calendar.google.com');
+    
+    // Determines how many events are happening in the next two weeks.
+    var now = new Date();
+    var twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+    var twoWeeksFromNow = new Date(now.getTime() + (336 * 60 * 60 * 1000));
+    
+    // grab instance of specific calendar
+    var events = CalendarApp.getCalendarById('n33gc2eubmq6clivk1s0imc28k@group.calendar.google.com').getEvents(twentyFourHoursFromNow, twoWeeksFromNow);
+    var event_object = app.createListBox().setName('event_object').setId('event_object').setWidth(200).setEnabled(true);
+    grid.setWidget(5, 1, event_object).setId('grid');
+    Logger.log('Number of events: ' + events.length);
+    
+    // add first static item to listbox
+    event_object.addItem('*Current Events*');
+    
+    // add all events to listbox
+    while (events != 0)
+    {
+        event_object.addItem(event_object);
+    }
+    event_object.setVisibleItemCount(1);
+    
     
     // This logic fetches the users projects and stores them in an array.
     //getUsersData(spreadsheetId, sheetName, firstRowKey, firstHeaderKey, secondHeaderKey)
@@ -121,50 +166,12 @@ function get_image(e){
 
 function results(e){
     var app = UiApp.getActiveApplication();
-    app.getElementById('grid').setText(4, 1, user + ' would like to reserve the testbed for ' + e.parameter.list_time + ' with ' + e.parameter.list_project + ' and ' + e.parameter.list_image + '?');
+    app.getElementById('grid').setText(4, 1, '"' + user + '"' + '\r would like to reserve the testbed for: \\n' + e.parameter.list_time + ' \\n ' + e.parameter.list_project + ' \\n ' + e.parameter.list_image + '?');
     app.getElementById('grid').setText(5, 0, "Confirm:");
     var submitButton = app.createButton('Submit').setVisible(true);  // calls back handler when clicked
     app.getElementById('grid').setWidget(5, 1, submitButton);
     return app;
 }
-
-
-
-
-
-
-
-
-
-function display_time(e){
-    // This logic defines the standarized time increments.
-    var list_time = app.createListBox().setName('list_time').setId('list_time').setWidth(200).setEnabled(true);
-    grid.setWidget(1, 1, list_time).setId('grid');
-    
-    list_time.addItem('Select');
-    list_time.addItem('2 Hours');
-    list_time.addItem('4 Hours');
-    list_time.addItem('6 Hours');
-    list_time.setVisibleItemCount(1);
-    
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -233,41 +240,40 @@ function getUsersData(spreadsheetId, sheetName, firstRowKey, firstHeaderKey, sec
 /*
  ****************************************************************************************************************
  Part y:    This function grabs the current events from the calendar ... tbc
- ****************************************************************************************************************
- */
-//function getCalendear()
-//{
-//
-//  // create a calendar object so you can call its methods.
-// var calendar = CalendarApp.getCalendarById('en33gc2eubmq6clivk1s0imc28k@group.calendar.google.com');
-//
-//  // Determines how many events are happening in the next two weeks.
-//  var now = new Date();
-//  var twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000));
-//  var twoWeeksFromNow = new Date(now.getTime() + (336 * 60 * 60 * 1000));
-//  var events = CalendarApp.getDefaultCalendar().getEvents(twentyFourHoursFromNow, twoWeeksFromNow);
-// Logger.log('Number of events: ' + events.length);
-//
-//
-//
-//}
+ *****************************************************************************************************************/
+
+function getCalendear()
+{
+    
+    // create a calendar object so you can call its methods.
+    var calendar = CalendarApp.getCalendarById('en33gc2eubmq6clivk1s0imc28k@group.calendar.google.com');
+    
+    // Determines how many events are happening in the next two weeks.
+    var now = new Date();
+    var twentyFourHoursFromNow = new Date(now.getTime() + (24 * 60 * 60 * 1000));
+    var twoWeeksFromNow = new Date(now.getTime() + (336 * 60 * 60 * 1000));
+    var events = CalendarApp.getDefaultCalendar().getEvents(twentyFourHoursFromNow, twoWeeksFromNow);
+    Logger.log('Number of events: ' + events.length);
+}
+
 /*
  ****************************************************************************************************************
  Part x:   Demo email and demo insert data into spreadsheet
- ****************************************************************************************************************
- */
-//function emailConfimation()
-//{
-//  MailApp.sendEmail("timsiwula@icloud.com", "Hi Tim", "Your testbed reservation has been completed");
-//}//function insertInSS(e){
-//  var responseSpreadSheet = '1AYNK4roBhzyeF95w4-GzOVYHdXfPv7pCZImrHFTf-xE';
-//  var app = UiApp.getActiveApplication();
-//  var name = e.parameter.name;
-//  var message = e.parameter.message;
-//  app.getElementById('info').setVisible(true).setStyleAttribute('color','red');
-//  
-//  var sheet = SpreadsheetApp.openById(responseSpreadSheet).getActiveSheet();
-//  var lastRow = sheet.getLastRow();
-//  var targetRange = sheet.getRange(lastRow+1, 1, 1, 2).setValues([[name,message]]);
-//  return app;
-//}
+ *****************************************************************************************************************/
+
+function emailConfimation()
+{
+    MailApp.sendEmail("timsiwula@icloud.com", "Hi Tim", "Your testbed reservation has been completed");
+}
+
+function insertInSS(e){
+    var responseSpreadSheet = '1AYNK4roBhzyeF95w4-GzOVYHdXfPv7pCZImrHFTf-xE';
+    var app = UiApp.getActiveApplication();
+    var name = e.parameter.name;
+    var message = e.parameter.message;
+    app.getElementById('info').setVisible(true).setStyleAttribute('color','red');
+    var sheet = SpreadsheetApp.openById(responseSpreadSheet).getActiveSheet();
+    var lastRow = sheet.getLastRow();
+    var targetRange = sheet.getRange(lastRow+1, 1, 1, 2).setValues([[name,message]]);
+    return app;
+}
