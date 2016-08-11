@@ -4,7 +4,7 @@ from tbntools import flaskApp
 from flask import request
 
 @flaskApp.route('/ovs/of/show/<br>')
-def show(br):
+def ofShow(br):
     global flaskApp
     output = subprocess.check_output(['ovs-ofctl','show',br])
     response = flaskApp.make_response(output)
