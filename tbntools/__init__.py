@@ -4,7 +4,7 @@ import threading
 
 flaskApp = Flask(__package__)
 
-flaskRunThread = threading.Thread(target=flaskApp.run,kwargs={'threaded':True})
+flaskRunThread = threading.Thread(target=flaskApp.run,kwargs={'host':'0.0.0.0','threaded':True})
 flaskRunThread.start()
 
 __all__ = []
