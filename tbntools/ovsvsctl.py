@@ -20,7 +20,7 @@ def list():
     return response
 
 @flaskApp.route('/ovs/vs/listports/<br>')
-def list(br):
+def listPorts(br):
     global flaskApp
     output = subprocess.check_output(['ovs-vsctl','list-ports',br])
     response = flaskApp.make_response(output)
