@@ -3,26 +3,27 @@ import subprocess
 from tbntools import flaskApp
 from flask import request
 
-@flaskApp.route('/ovs/vs/show')
-def show():
+@flaskApp.route('/ovs/of/show/<br>')
+def show(br):
     global flaskApp
-    output = subprocess.check_output(['ovs-vsctl','show'])
+    output = subprocess.check_output(['ovs-ofctl','show',br])
     response = flaskApp.make_response(output)
     response.headers["content-type"] = "text/plain"
     return response
 
-@flaskApp.route('/ovs/vs/list')
-def list():
+
+@flaskApp.route('/ovs/of/dumpflows/<br>')
+def dumpFlows(br):
     global flaskApp
-    output = subprocess.check_output(['ovs-vsctl','list'])
+    output = subprocess.check_output(['ovs-ofctl','dump-flows',br])
     response = flaskApp.make_response(output)
     response.headers["content-type"] = "text/plain"
     return response
 
-@flaskApp.route('/ovs/vs/listports/<br>')
-def list(br):
+@flaskApp.route('/ovs/of/dumpports/<br>')
+def dumpPorts(br):
     global flaskApp
-    output = subprocess.check_output(['ovs-vsctl','list-ports',br])
+    output = subprocess.check_output(['ovs-ofctl','dump-ports',br])
     response = flaskApp.make_response(output)
     response.headers["content-type"] = "text/plain"
     return response
