@@ -1,6 +1,6 @@
 import subprocess
 
-from tbntools import flaskApp
+from __main__ import flaskApp
 from flask import request
 
 @flaskApp.route('/ovs/of/show/<br>')

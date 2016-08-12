@@ -1,6 +1,6 @@
 import subprocess
 
-from tbntools import flaskApp
+from __main__ import flaskApp
 from flask import request
 
 @flaskApp.route('/ovs/vs/show')
@@ -11,10 +11,10 @@ def show():
     response.headers["content-type"] = "text/plain"
     return response
 
-@flaskApp.route('/ovs/vs/list')
-def list():
+@flaskApp.route('/ovs/vs/listbr')
+def listBridges():
     global flaskApp
-    output = subprocess.check_output(['ovs-vsctl','list'])
+    output = subprocess.check_output(['ovs-vsctl','list-br'])
     response = flaskApp.make_response(output)
     response.headers["content-type"] = "text/plain"
     return response
