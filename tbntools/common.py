@@ -2,7 +2,7 @@ from __main__ import flaskApp
 from flask import request,Response
 import subprocess
 
-@flaskApp.route('/stop/<value>')
+#@flaskApp.route('/stop/<value>')
 def killAll(value = 0):
 	if (value != '1'):
 		return 'not authorized'
